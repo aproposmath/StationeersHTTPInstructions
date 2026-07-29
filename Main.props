@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ModID>StationeersHTTPInstructions</ModID>
+    <AssemblyName>HTTPInstructions</AssemblyName>
+    <Description>HTTP get/post instructions for IC10</Description>
+    <!-- Optional: Set this if it's not found automatically or you want to force a specific Stationeers directory -->
+    <StationeersDirectory/>
+  </PropertyGroup>
+  <ItemGroup>
+      <Reference Include="System.Net.Http" />
+  </ItemGroup>
+</Project>

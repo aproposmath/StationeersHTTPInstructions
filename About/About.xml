@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetadata xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>HTTP Instructions</Name>
+  <Author>aproposmath, JacksonTheMaster</Author>
+  <ModID>StationeersHTTPInstructions</ModID>
+  <Version>0.0.1</Version>
+  <Description>
+        HTTP instructions for IC10
+
+        [b]WARNING[/b]
+        This mod can impose severe security risks, only run it if you know what you are doing.
+        ONLY run workshop scripts using this mod if you either
+          - fully understand the code
+          - ultimately trust the author
+
+        [b]Installation[/b]
+        This is a [b]StationeersLaunchPad[/b] Plugin Mod. It requires BepInEx to be installed.
+        See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
+
+        Source Code: https://github.com/aproposmath/StationeersHTTPInstructions
+    </Description>
+  <ChangeLog>
+        0.0.1:
+        
+        - Initial release
+
+  </ChangeLog>
+  <Tags>
+    <Tag>HTTP</Tag>
+    <Tag>IC10</Tag>
+    <Tag>Code</Tag>
+    <Tag>BepInEx</Tag>
+    <Tag>StationeersLaunchPad</Tag>
+  </Tags>
+  <Dependencies />
+  <LoadBefore />
+  <LoadAfter />
+  <InGameDescription><![CDATA[
+<size=30><color=#ffff00>HTTP instructions for IC10</color></size>
+
+<size=30><color=#ff8f00>WARNING</color></size>
+This mod can impose severe security risks, only run it if you know what you are doing.
+ONLY run workshop/copied scripts using this mod if you either
+  - fully understand the code
+  - ultimately trust the author
+
+<b><color=#ffff00>Installation</color></b>
+This is a <color=#ffa500>StationeersLaunchPad</color> Plugin Mod. It requires BepInEx to be installed.
+See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
+
+Source Code: https://github.com/aproposmath/StationeersHTTPInstructions
+]]></InGameDescription>
+</ModMetadata>
