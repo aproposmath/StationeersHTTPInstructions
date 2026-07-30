@@ -1,6 +1,7 @@
 namespace StationeersHTTPInstructions;
 
 using System.Text.RegularExpressions;
+using System.Text;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -357,6 +358,9 @@ public class HTTPPostOperation : BaseHTTPRequestOperation
         var url = UrlTemplate.GetString();
         var payload = _InputTemplate.GetString();
         L.Debug($"HTTP POST url={url}, payload={payload}");
-        return Client.PostAsync(url, payload == null ? null : new StringContent(payload));
+        var content = payload == null
+               ? null
+               : new StringContent(payload, Encoding.UTF8, "application/json");
+        return Client.PostAsync(url, content);
     }
 }
