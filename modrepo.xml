@@ -3,11 +3,11 @@
   >
   <ModVersion
       ModID="StationeersHTTPInstructions"
-      Version="0.0.1"
+      Version="0.0.1.1-dev"
       Name="HTTP Instructions"
       Author="aproposmath, JacksonTheMaster"
       Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/main/HTTPInstructions-main.zip"
-      Digest="sha256:d2a4ced8a281a830a2679bfb4aba1427e702248fb324de3918c6097a8b53a06f"
+      Digest="sha256:8f18ea9e468e39553bb076bca8367c04921a72bc36686a4c06f97f9ecfadced9"
     >
     <Branch
         Value="main"

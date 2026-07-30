@@ -1,4 +1,23 @@
 {
+    "sha256:8f18ea9e468e39553bb076bca8367c04921a72bc36686a4c06f97f9ecfadced9": {
+        "author": "aproposmath, JacksonTheMaster",
+        "branch": [
+            "main"
+        ],
+        "depends_on": [],
+        "digest": "sha256:8f18ea9e468e39553bb076bca8367c04921a72bc36686a4c06f97f9ecfadced9",
+        "id": "StationeersHTTPInstructions",
+        "name": "HTTP Instructions",
+        "tag": [
+            "HTTP",
+            "IC10",
+            "Code",
+            "BepInEx",
+            "StationeersLaunchPad"
+        ],
+        "url": "https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/main/HTTPInstructions-main.zip",
+        "version": "0.0.1.1-dev"
+    },
     "sha256:963330f773667139e97b2145562242204e8b1a3ca27e433ae6648110f96fa0d5": {
         "author": "aproposmath, JacksonTheMaster",
         "branch": [],
@@ -14,25 +33,6 @@
             "StationeersLaunchPad"
         ],
         "url": "https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.1/HTTPInstructions-v0.0.1.zip",
-        "version": "0.0.1"
-    },
-    "sha256:d2a4ced8a281a830a2679bfb4aba1427e702248fb324de3918c6097a8b53a06f": {
-        "author": "aproposmath, JacksonTheMaster",
-        "branch": [
-            "main"
-        ],
-        "depends_on": [],
-        "digest": "sha256:d2a4ced8a281a830a2679bfb4aba1427e702248fb324de3918c6097a8b53a06f",
-        "id": "StationeersHTTPInstructions",
-        "name": "HTTP Instructions",
-        "tag": [
-            "HTTP",
-            "IC10",
-            "Code",
-            "BepInEx",
-            "StationeersLaunchPad"
-        ],
-        "url": "https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/main/HTTPInstructions-main.zip",
         "version": "0.0.1"
     }
 }
