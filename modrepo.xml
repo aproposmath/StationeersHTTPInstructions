@@ -14,5 +14,13 @@
     />
   </ModVersion
   >
+  <ModVersion
+      ModID="StationeersHTTPInstructions"
+      Version="0.0.1"
+      Name="HTTP Instructions"
+      Author="aproposmath, JacksonTheMaster"
+      Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.1/HTTPInstructions-v0.0.1.zip"
+      Digest="sha256:963330f773667139e97b2145562242204e8b1a3ca27e433ae6648110f96fa0d5"
+  />
 </ModRepo
 >

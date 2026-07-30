@@ -1,4 +1,21 @@
 {
+    "sha256:963330f773667139e97b2145562242204e8b1a3ca27e433ae6648110f96fa0d5": {
+        "author": "aproposmath, JacksonTheMaster",
+        "branch": [],
+        "depends_on": [],
+        "digest": "sha256:963330f773667139e97b2145562242204e8b1a3ca27e433ae6648110f96fa0d5",
+        "id": "StationeersHTTPInstructions",
+        "name": "HTTP Instructions",
+        "tag": [
+            "HTTP",
+            "IC10",
+            "Code",
+            "BepInEx",
+            "StationeersLaunchPad"
+        ],
+        "url": "https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.1/HTTPInstructions-v0.0.1.zip",
+        "version": "0.0.1"
+    },
     "sha256:d2a4ced8a281a830a2679bfb4aba1427e702248fb324de3918c6097a8b53a06f": {
         "author": "aproposmath, JacksonTheMaster",
         "branch": [
