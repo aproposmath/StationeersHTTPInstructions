@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModRepo
+  >
+  <ModVersion
+      ModID="StationeersHTTPInstructions"
+      Version="0.0.1"
+      Name="HTTP Instructions"
+      Author="aproposmath, JacksonTheMaster"
+      Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/main/HTTPInstructions-main.zip"
+      Digest="sha256:d2a4ced8a281a830a2679bfb4aba1427e702248fb324de3918c6097a8b53a06f"
+    >
+    <Branch
+        Value="main"
+    />
+  </ModVersion
+  >
+</ModRepo
+>
