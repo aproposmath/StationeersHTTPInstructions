@@ -70,36 +70,33 @@ public class Server
         {
             if (context.Request.HttpMethod == "POST")
             {
+                context.Response.StatusCode = 404;
                 using var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
                 string body = await reader.ReadToEndAsync();
-
+                L.Debug($"Received POST path = '{context.Request.Url.AbsolutePath}', parsed value {body}");
                 lock (_Lock)
                 {
                     Data[context.Request.Url.AbsolutePath] = body;
                 }
-
-                L.Debug($"Received POST '{body}', parsed value {body}");
             }
 
             else if (context.Request.HttpMethod == "GET")
             {
-                string path = context.Request.Url.AbsolutePath;
+                string path = context.Request.Url.LocalPath;
+                L.Debug($"Received GET path = '{path}'");
                 string value = GetValue(path, true);
 
                 if (value != null)
                 {
+                    context.Response.StatusCode = 200;
                     byte[] buffer = System.Text.Encoding.UTF8.GetBytes(value);
                     context.Response.ContentLength64 = buffer.Length;
                     await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
                     L.Debug($"Responded to GET '{path}' with value '{value}'");
                 }
                 else
-                {
                     context.Response.StatusCode = 404;
-                }
             }
-
-            context.Response.StatusCode = 200;
         }
         catch (Exception ex)
         {
@@ -166,11 +163,10 @@ public abstract class BaseHTTPListenOperation : BaseHTTPOperation
 
 public class HTTPOnGetOperation : BaseHTTPListenOperation
 {
-    public static string OP_NAME = "http_on_get";
     public HTTPOnGetOperation(ProgrammableChip chip, int lineNumber, List<string> tokens)
         : base(chip, lineNumber)
     {
-        L.Debug($"Creating {OP_NAME} operation with tokens: {string.Join(", ", tokens)}");
+        L.Debug($"Creating http_on_get operation with tokens: {string.Join(", ", tokens)}");
 
         if (tokens.Count < 4)
             throw new ProgrammableChipException(
@@ -200,12 +196,10 @@ public class HTTPOnGetOperation : BaseHTTPListenOperation
 
 public class HTTPOnPostOperation : BaseHTTPListenOperation
 {
-    public static string OP_NAME = "http_on_post";
-
     public HTTPOnPostOperation(ProgrammableChip chip, int lineNumber, List<string> tokens)
         : base(chip, lineNumber)
     {
-        L.Debug($"Creating {OP_NAME} operation with tokens: {string.Join(", ", tokens)}");
+        L.Debug($"Creating http_on_post operation with tokens: {string.Join(", ", tokens)}");
 
         if (tokens.Count < 4)
             throw new ProgrammableChipException(
@@ -222,7 +216,7 @@ public class HTTPOnPostOperation : BaseHTTPListenOperation
         try
         {
             var value = _Server.GetValue(_Path, true);
-            L.Debug($"HTTP On POST operation retrieved value: {value!=null}, {value}");
+            L.Debug($"HTTP On POST operation retrieved value: {value != null}, {value}, path={_Path}, server values: {string.Join(", ", _Server.Data)}");
             SetOutputs(value != null, value);
         }
         catch (Exception ex)

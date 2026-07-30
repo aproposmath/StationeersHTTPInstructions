@@ -68,10 +68,10 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
 
     public static readonly Dictionary<string, Type> OperationTypes = new()
     {
-        { HTTPGetOperation.OP_NAME, typeof(HTTPGetOperation) },
-        { HTTPPostOperation.OP_NAME, typeof(HTTPPostOperation) },
-        { HTTPOnPostOperation.OP_NAME, typeof(HTTPOnPostOperation) },
-        { HTTPOnGetOperation.OP_NAME, typeof(HTTPOnGetOperation) }
+        { "http_get", typeof(HTTPGetOperation) },
+        { "http_post", typeof(HTTPPostOperation) },
+        { "http_on_post", typeof(HTTPOnPostOperation) },
+        { "http_on_get", typeof(HTTPOnGetOperation) }
     };
 
     public DoubleValueVariable MakeInputVariable(string registerOrValueCode) => new(_Chip, _LineNumber, registerOrValueCode, InstructionInclude.MaskDoubleValue, throwException: false);
@@ -130,6 +130,10 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
                             strValue = strValue.Substring(start, end - start);
                             L.Debug($"strValue='{strValue}', start={start}, end={end}");
                         }
+                        if (string.IsNullOrEmpty(strValue))
+                            return double.NaN;
+                        if (strValue.Length > 6)
+                            strValue = strValue.Substring(0, 6);
                         return ProgrammableChip.PackAscii6(strValue, _LineNumber);
                     }
 
@@ -144,14 +148,15 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
             return double.NaN;
         }
     }
-    
+
     protected void ParseInputs(string json)
     {
-        if(string.IsNullOrEmpty(json))
+        if (string.IsNullOrEmpty(json))
             return;
-            
+
         if (!json.StartsWith("'") && !json.StartsWith("{"))
-            json = $"'{json}'";
+            json = $"'\"{json}\": \".\"'";
+
         _InputTemplate = new(json, chip, lineNumber);
     }
 
@@ -170,6 +175,11 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
         _OutputVariables = [];
         var root = JToken.Parse(json);
         L.Debug($"Parsed outputs JSON: {root}");
+        if (root.Type == JTokenType.String)
+        {
+            var name = root.Value<string>();
+            _OutputVariables[name] = MakeOutputVariable(name);
+        }
         foreach (var property in root.Children<JProperty>())
         {
             var name = property.Name;
@@ -192,17 +202,18 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
         if (_OutputTemplate == null)
             return;
 
-        if (_SuccessOutput != null)
+        var successIndex = _SuccessOutput?.GetVariableIndex(ProgrammableChip._AliasTarget.Register) ?? -1;
+        if (successIndex >= 0 && !isSuccess)
         {
             L.Debug($"Setting success output '{_SuccessOutput._Alias}' to {(isSuccess ? 1.0 : 0.0)}");
-            _Chip._Registers[_SuccessOutput.GetVariableIndex(ProgrammableChip._AliasTarget.Register)] = isSuccess ? 1.0 : 0.0;
+            _Chip._Registers[successIndex] = 0;
             // in case we have a separate success output, don't overwrite the other outputs on failure
-            if (!isSuccess)
-                return;
+            return;
         }
 
         var outputs = JToken.Parse(_OutputTemplate.GetString());
         JToken root = null;
+
         try
         {
             root = JToken.Parse(response);
@@ -211,43 +222,46 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
         {
             L.Error($"Failed to parse JSON response: {ex}");
         }
-        
-        foreach (var property in outputs.Children<JProperty>())
+
+        try
         {
-            var name = property.Name;
-            var path = property.Value.Value<string>();
-            if(path == "$success")
-                continue;
-            var index = _OutputVariables[name].GetVariableIndex(ProgrammableChip._AliasTarget.Register);
-            var value = GetJsonValue(root, path);
-            _Chip._Registers[index] = value;
+            Dictionary<int, double> outputValues = [];
+
+            foreach (var property in outputs.Children<JProperty>())
+            {
+                var name = property.Name;
+                var path = property.Value.Value<string>();
+                if (path == "$success")
+                    continue;
+                var index = _OutputVariables[name].GetVariableIndex(ProgrammableChip._AliasTarget.Register);
+                outputValues[index] = GetJsonValue(root, path);
+            }
+
+            foreach (var kvp in outputValues)
+                _Chip._Registers[kvp.Key] = kvp.Value;
         }
+        catch (Exception ex)
+        {
+            L.Error($"Failed to set output values: {ex}");
+            isSuccess = false;
+        }
+        if (successIndex >= 0)
+            _Chip._Registers[successIndex] = isSuccess ? 1.0 : 0.0;
     }
 
 }
 
-public class HTTPGetOperation : BaseHTTPOperation
+public abstract class BaseHTTPRequestOperation : BaseHTTPOperation
 {
-    public static string OP_NAME = "http_get";
     protected HashSet<Task<HttpResponseMessage>> _RequestTasks = [];
     public bool IsFireAndForget => _OutputTemplate == null;
 
-    public HTTPGetOperation(ProgrammableChip chip, int lineNumber, List<string> tokens) : base(chip, lineNumber)
-    {
-        if (tokens.Count < 2 || tokens.Count > 3)
-            throw new ProgrammableChipException(ProgrammableChipException.ICExceptionType.IncorrectArgumentCount, lineNumber);
-
-        UrlTemplate = new TemplateString(tokens[1], chip, lineNumber);
-
-        if (tokens.Count == 3)
-            ParseOutputs(tokens[2]);
-    }
+    public BaseHTTPRequestOperation(ProgrammableChip chip, int lineNumber) : base(chip, lineNumber)
+    { }
 
     public virtual Task<HttpResponseMessage> MakeRequest()
     {
-        var url = UrlTemplate.GetString();
-        L.Debug($"HTTP GET url={url}");
-        return Client.GetAsync(url);
+        throw new NotImplementedException("MakeRequest must be implemented in derived classes.");
     }
 
     public override int Execute(int index)
@@ -256,9 +270,9 @@ public class HTTPGetOperation : BaseHTTPOperation
         {
             if (IsFireAndForget)
             {
-                foreach (var task in _RequestTasks)
-                    if (task.IsCompleted)
-                        _RequestTasks.Remove(task);
+                var completedTasks = _RequestTasks.Where(t => t.IsCompleted).ToList();
+                foreach (var task in completedTasks)
+                    _RequestTasks.Remove(task);
                 _RequestTasks.Add(MakeRequest());
                 return index + 1;
             }
@@ -277,7 +291,7 @@ public class HTTPGetOperation : BaseHTTPOperation
                 bool isSuccess = false;
                 string content = null;
                 if (request.Exception != null)
-                    L.Error($"HTTP GET request failed: {request.Exception}");
+                    L.Error($"HTTP request failed: {request.Exception}");
                 else
                 {
                     var response = request.Result;
@@ -292,7 +306,7 @@ public class HTTPGetOperation : BaseHTTPOperation
         }
         catch (Exception ex)
         {
-            L.Error($"HTTP GET operation failed: {ex}");
+            L.Error($"HTTP request failed: {ex}");
             SetOutputs(false, null);
         }
 
@@ -300,19 +314,40 @@ public class HTTPGetOperation : BaseHTTPOperation
     }
 }
 
-public class HTTPPostOperation : HTTPGetOperation
+public class HTTPGetOperation : BaseHTTPRequestOperation
 {
-    public new static string OP_NAME = "http_post";
-
-    public HTTPPostOperation(ProgrammableChip chip, int lineNumber, List<string> tokens) : base(chip, lineNumber, tokens)
+    public HTTPGetOperation(ProgrammableChip chip, int lineNumber, List<string> tokens) : base(chip, lineNumber)
     {
+        if (tokens.Count < 2 || tokens.Count > 3)
+            throw new ProgrammableChipException(ProgrammableChipException.ICExceptionType.IncorrectArgumentCount, lineNumber);
+
+        UrlTemplate = new TemplateString(tokens[1], chip, lineNumber);
+
+        if (tokens.Count == 3)
+            ParseOutputs(tokens[2]);
+    }
+
+    public override Task<HttpResponseMessage> MakeRequest()
+    {
+        var url = UrlTemplate.GetString();
+        L.Debug($"HTTP GET url={url}");
+        return Client.GetAsync(url);
+    }
+
+}
+
+public class HTTPPostOperation : BaseHTTPRequestOperation
+{
+    public HTTPPostOperation(ProgrammableChip chip, int lineNumber, List<string> tokens) : base(chip, lineNumber)
+    {
+        L.Debug($"HTTP POST tokens: {tokens.Count} {string.Join(", ", tokens)}");
         if (tokens.Count < 3 || tokens.Count > 4)
             throw new ProgrammableChipException(ProgrammableChipException.ICExceptionType.IncorrectArgumentCount, lineNumber);
 
         UrlTemplate = new TemplateString(tokens[1], chip, lineNumber);
 
         ParseInputs(tokens[2]);
-        
+
         if (tokens.Count == 4)
             ParseOutputs(tokens[3]);
     }
@@ -321,7 +356,7 @@ public class HTTPPostOperation : HTTPGetOperation
     {
         var url = UrlTemplate.GetString();
         var payload = _InputTemplate.GetString();
-        L.Debug($"HTTP POST url={url}");
+        L.Debug($"HTTP POST url={url}, payload={payload}");
         return Client.PostAsync(url, payload == null ? null : new StringContent(payload));
     }
 }

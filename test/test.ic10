@@ -1,0 +1,39 @@
+define leds HASH("StructureConsoleLED1x2Back")
+define D0 HASH("0")
+define D1 HASH("1")
+define D2 HASH("2")
+define D3 HASH("3")
+define D4 HASH("4")
+define D5 HASH("5")
+sb leds Setting -1
+
+sb leds On 1
+sb leds Mode DisplayMode.String
+yield
+sbn leds D1 Mode DisplayMode.Default
+sbn leds D5 Mode DisplayMode.Default
+sbn leds D0 Setting STR("Number")
+sbn leds D2 Setting STR("String")
+sbn leds D4 Setting STR("JSON.a")
+
+alias number r10
+alias string r11
+alias json.a r12
+alias ok r13
+
+move number -1
+move string STR("-1")
+move json.a -1
+
+move r0 0
+main:
+yield
+sbn leds D1 Setting number
+sbn leds D3 Setting string
+sbn leds D5 Setting json.a
+http_on_post 8082 /data '{"number": "num", "string": "str", "ok": "$success"}'
+http_on_get 8082 /data '{"num": ${number}, "str": ${string}}'
+http_get http://localhost:8080/json '{"json.a": "a", "ok": "$success"}'
+add number number 1
+http_post http://localhost:8080/number '${number}'
+j main
