@@ -1,0 +1,22 @@
+- id: stationeers_webhook
+  alias: Stationeers Webhook
+
+  triggers:
+    - trigger: webhook
+      webhook_id: sensor_update
+      allowed_methods:
+        - POST
+      local_only: false
+
+  actions:
+    - variables:
+        payload: "{{ trigger.json }}"
+
+    - event: external_sensor_update
+      event_data:
+        solar_vertical: "{{ payload.solar_vertical }}"
+        solar_horizontal: "{{ payload.solar_horizontal }}"
+        pressure: "{{ payload.pressure }}" 
+        ac_temperature: "{{ payload.ac_temperature }}"
+        temperature: "{{ payload.temperature }}"
+        light: "{{ payload.light }}"
