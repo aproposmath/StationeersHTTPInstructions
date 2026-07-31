@@ -3,25 +3,33 @@
   >
   <ModVersion
       ModID="StationeersHTTPInstructions"
-      Version="0.0.2"
-      Name="HTTP Instructions"
-      Author="aproposmath, JacksonTheMaster"
-      Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.2/HTTPInstructions-v0.0.2.zip"
-      Digest="sha256:b0a29b7eae65cbcc025441e05805c6f776f2029a27f3170113d2e32262697326"
-  />
-  <ModVersion
-      ModID="StationeersHTTPInstructions"
-      Version="0.0.1.3-dev"
+      Version="0.0.3"
       Name="HTTP Instructions"
       Author="aproposmath, JacksonTheMaster"
       Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/main/HTTPInstructions-main.zip"
-      Digest="sha256:0ddbb0542a1891194c6cb6d520fd6eac268c128ac10076f4e40609e09d0a7e03"
+      Digest="sha256:0904b9b79a5428bca347a371c1f5458181c7326ebe17a7780857fb1ed1402308"
     >
     <Branch
         Value="main"
     />
   </ModVersion
   >
+  <ModVersion
+      ModID="StationeersHTTPInstructions"
+      Version="0.0.3"
+      Name="HTTP Instructions"
+      Author="aproposmath, JacksonTheMaster"
+      Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.3/HTTPInstructions-v0.0.3.zip"
+      Digest="sha256:6a783404f269960e59ea6242e43c6dce28117210db057aa066ca0b8ac3313c50"
+  />
+  <ModVersion
+      ModID="StationeersHTTPInstructions"
+      Version="0.0.2"
+      Name="HTTP Instructions"
+      Author="aproposmath, JacksonTheMaster"
+      Url="https://github.com/aproposmath/StationeersHTTPInstructions/releases/download/v0.0.2/HTTPInstructions-v0.0.2.zip"
+      Digest="sha256:b0a29b7eae65cbcc025441e05805c6f776f2029a27f3170113d2e32262697326"
+  />
   <ModVersion
       ModID="StationeersHTTPInstructions"
       Version="0.0.1"
