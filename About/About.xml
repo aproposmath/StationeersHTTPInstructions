@@ -5,7 +5,15 @@
   <ModID>StationeersHTTPInstructions</ModID>
   <Version>0.0.1</Version>
   <Description>
-        HTTP instructions for IC10
+        Adds HTTP GET/POST instructions and local HTTP endpoints for IC10.
+
+        Examples:
+          http_get 'http://host/value' r0
+          http_post 'http://host/data' '${r0}'
+          http_on_get 8080 /status '{"value":${r0}}'
+          http_on_post 8080 /sensor '{"r1":"value","r2":"$success"}'
+
+        Use output mappings to read JSON fields into registers. Strings are packed with STR().
 
         [b]WARNING[/b]
         This mod can impose severe security risks, only run it if you know what you are doing.
@@ -37,6 +45,16 @@
   <LoadAfter />
   <InGameDescription><![CDATA[
 <size=30><color=#ffff00>HTTP instructions for IC10</color></size>
+
+Adds HTTP GET/POST instructions and local HTTP endpoints for IC10.
+
+<b><color=#ffff00>Examples</color></b>
+<color=#b5e853>http_get 'http://host/value' r0</color>
+<color=#b5e853>http_post 'http://host/data' '${r0}'</color>
+<color=#b5e853>http_on_get 8080 /status '{"value":${r0}}'</color>
+<color=#b5e853>http_on_post 8080 /sensor '{"r1":"value","r2":"$success"}'</color>
+
+Use output mappings to read JSON fields into registers. Strings are packed with STR().
 
 <size=30><color=#ff8f00>WARNING</color></size>
 This mod can impose severe security risks, only run it if you know what you are doing.

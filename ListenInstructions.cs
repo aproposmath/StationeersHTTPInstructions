@@ -70,7 +70,7 @@ public class Server
         {
             if (context.Request.HttpMethod == "POST")
             {
-                context.Response.StatusCode = 404;
+                context.Response.StatusCode = 200;
                 using var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
                 string body = await reader.ReadToEndAsync();
                 L.Debug($"Received POST path = '{context.Request.Url.AbsolutePath}', parsed value {body}");
@@ -84,7 +84,7 @@ public class Server
             {
                 string path = context.Request.Url.LocalPath;
                 L.Debug($"Received GET path = '{path}'");
-                string value = GetValue(path, true);
+                string value = GetValue(path);
 
                 if (value != null)
                 {
@@ -182,7 +182,7 @@ public class HTTPOnGetOperation : BaseHTTPListenOperation
     {
         try
         {
-            _Server.SetValue(_Path, _InputTemplate.GetString());
+            _Server.SetValue(_Path, GetInputData());
         }
         catch (Exception ex)
         {

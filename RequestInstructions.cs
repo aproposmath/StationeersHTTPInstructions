@@ -50,8 +50,10 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
     protected TemplateString UrlTemplate = null;
     protected TemplateString _OutputTemplate = null;
     protected TemplateString _InputTemplate = null;
+    protected DoubleValueVariable _InputVariable = null;
     protected Dictionary<string, IndexVariable> _OutputVariables = null;
     protected IndexVariable _SuccessOutput = null;
+    protected IndexVariable _SingleOutput = null;
 
     protected static HttpClient Client
     {
@@ -156,9 +158,20 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
             return;
 
         if (!json.StartsWith("'") && !json.StartsWith("{"))
-            json = $"'\"{json}\": \".\"'";
+        {
+            _InputVariable = MakeInputVariable(json);
+            return;
+        }
 
         _InputTemplate = new(json, chip, lineNumber);
+    }
+
+    protected string GetInputData()
+    {
+        if (_InputVariable != null)
+            return _InputVariable.GetVariableValue(ProgrammableChip._AliasTarget.Register).ToString();
+
+        return _InputTemplate?.GetString();
     }
 
     protected void ParseOutputs(string json)
@@ -168,7 +181,10 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
             return;
 
         if (!json.StartsWith("'"))
-            json = $"'\"{json}\": \".\"'";
+        {
+            _SingleOutput = MakeOutputVariable(json);
+            return;
+        }
 
         json = json.Trim('\'');
 
@@ -200,6 +216,28 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
 
     protected void SetOutputs(bool isSuccess, string response)
     {
+        if (_SingleOutput != null)
+        {
+            var index = _SingleOutput.GetVariableIndex(ProgrammableChip._AliasTarget.Register);
+            if (!isSuccess)
+            {
+                _Chip._Registers[index] = double.NaN;
+                return;
+            }
+
+            try
+            {
+                var responseRoot = JToken.Parse(response);
+                _Chip._Registers[index] = GetJsonValue(new JObject { ["value"] = responseRoot }, "value");
+            }
+            catch (Exception ex)
+            {
+                L.Error($"Failed to parse JSON response: {ex}");
+                _Chip._Registers[index] = double.NaN;
+            }
+            return;
+        }
+
         if (_OutputTemplate == null)
             return;
 
@@ -255,7 +293,7 @@ public abstract class BaseHTTPOperation(ProgrammableChip chip, int lineNumber) :
 public abstract class BaseHTTPRequestOperation : BaseHTTPOperation
 {
     protected HashSet<Task<HttpResponseMessage>> _RequestTasks = [];
-    public bool IsFireAndForget => _OutputTemplate == null;
+    public bool IsFireAndForget => _OutputTemplate == null && _SingleOutput == null;
 
     public BaseHTTPRequestOperation(ProgrammableChip chip, int lineNumber) : base(chip, lineNumber)
     { }
@@ -356,11 +394,19 @@ public class HTTPPostOperation : BaseHTTPRequestOperation
     public override Task<HttpResponseMessage> MakeRequest()
     {
         var url = UrlTemplate.GetString();
-        var payload = _InputTemplate.GetString();
-        L.Debug($"HTTP POST url={url}, payload={payload}");
+        var payload = GetInputData();
+        var type = "plain/text";
+        if (!string.IsNullOrEmpty(payload))
+        {
+            if (payload.Trim().StartsWith("{"))
+                type = "application/json";
+            else if (payload.Contains("="))
+                type = "application/x-www-form-urlencoded";
+        }
+        L.Debug($"HTTP POST url={url}, payload={payload}, type={type}");
         var content = payload == null
                ? null
-               : new StringContent(payload, Encoding.UTF8, "application/json");
+               : new StringContent(payload, Encoding.UTF8, type);
         return Client.PostAsync(url, content);
     }
 }

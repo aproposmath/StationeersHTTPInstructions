@@ -9,6 +9,16 @@ Adds four HTTP instructions to Stationeers IC10. Listener instructions bind to a
 | `http_on_post` | Send data **to IC10** with an HTTP POST |
 | `http_on_get` | Serve data **from IC10** with an HTTP GET |
 
+## Installation
+
+Two possibilities:
+- Download the latest release from [GitHub](https://github.com/aproposmath/StationeersHTTPInstructions/releases) and copy the `HTTPInstructions.dll` to <Stationeers install dir>/BepInEx/plugins
+- Run these commands in the StationeersLaunchPad console:
+```
+slp repos add github.com/aproposmath/StationeersHTTPInstructions
+slp repomods add StationeersHTTPInstructions
+```
+
 ## Argument types
 
 #### `<url>`
@@ -17,15 +27,15 @@ Adds four HTTP instructions to Stationeers IC10. Listener instructions bind to a
 - Templates are supported: `https://example.com/${r0}/?page=${someIC10Alias}`
 
 #### `<input_data>`
-- Either a register/alias name, or a JSON string (single quotes necessary)
-- Templates are supported: `'{"temperature":${r0}, "status":"${r1}"}'`
+- A register/alias name sends its numeric value as JSON.
+- To send a JSON value or object, enclose it in single quotes. Templates are supported: `'{"temperature":${r0}, "status":"${r1}"}'`
 
 #### `<output_data>`
-- Either a register name (then the output is expected to be a single number), or a JSON dictionary mapping register/alias names to JSON paths, templates are supported
-- Special field "$success" is set to `1` for a successful HTTP status and `0` otherwise.
+- Either a register/alias name (the response must be a single number or string), or a single-quoted JSON object mapping register/alias names to JSON paths. Templates are supported in JSON paths.
+- The special value `"$success"` sets its output register to `1` for a successful HTTP status and `0` otherwise.
 - If "$success" is present, the other outputs are unchanged on failure
 - If "$success" is NOT present, all outputs are set to `NaN` on failure
-- Strings are packed with `STR()`. A `[start:end]` suffix selects part of a string. Both, `start` and `end` are optional. If `start` is omitted, it defaults to `0`. If `end` is omitted, it defaults to the string length. Max 6 chars are extracted. If the range is invalid, the output is set to `NaN`.
+- Strings are packed with `STR()`. A `[start:end]` suffix selects part of a string. Both, `start` and `end` are optional. If `start` is omitted, it defaults to `0`. If `end` is omitted, the next 6 characters are selected (or fewer at the end of the string). Max 6 chars are extracted. If the range is invalid, the output is set to `NaN`.
 
 Examples:
 
@@ -55,7 +65,7 @@ http_post 'http://127.0.0.1:8000/readings' '"${r0}"'
 
 # wait until done, store success in r15
 alias aliasTemperature r1
-http_post 'http://127.0.0.1:8000/data' '"{"temperature": ${aliasTemperature}, "pressure": ${r2}}"' '{"r15": $success}'
+http_post 'http://127.0.0.1:8000/data' '{"temperature": ${aliasTemperature}, "pressure": ${r2}}' '{"r15":"$success"}'
 ```
 
 ## `http_on_post <port> <path> <output_data>`
